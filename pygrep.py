@@ -1,13 +1,14 @@
 #! venv/bin/python3
-import re
 import argparse
 import logging
 import logging.config
 import os
+import re
 
 import settings
 
-COLOR_START = '\033[92m'
+# ANSI escape code for bold green
+COLOR_START = '\033[1;92m'
 COLOR_END = '\033[0m'
 
 
@@ -28,24 +29,38 @@ def init_logging():
     logging.config.dictConfig(settings.LOGGING)
 
 
+def color_wrap(s):
+    return COLOR_START + s + COLOR_END
+
+
 def search(target, pattern):
     logging.debug('target: %s' % target)
     if os.path.isdir(target):
         # recursive directory search
-        for element in os.listdir(target):
-            search(element, pattern)
+        count = 0
+        for (this_dir, sub_dirs, files) in os.walk(target):
+            logging.debug('this dir: %s sub_dirs: %s files: %s',
+                          this_dir, ' '.join(sub_dirs), ' '.join(files))
+            count += 1
     else:
         # single file case
         fp = open(target)
         for (linenum, line) in enumerate(fp):
             match = pattern.findall(line)
             if match:
-                colored_line = re.sub(pattern, COLOR_START + '\\1' + COLOR_END, line)
-                print(target + ":" + str(linenum) + " :: " + colored_line)
+                yield (target, linenum, line)
+        fp.close()
+
+
+def display_matches(matches, pattern):
+    for (file, linenum, line) in matches:
+        colored_line = re.sub(pattern, color_wrap('\\1'), line)
+        print(file + ":" + str(linenum) + " :: " + colored_line)
 
 
 if __name__ == '__main__':
     init_logging()
     args = parse_args()
-    query = r'(' + args.query + ')'
-    search(args.target, re.compile(query))
+    pattern = re.compile(r'(' + args.query + ')')
+    matches = search(args.target, pattern)
+    display_matches(matches, pattern)
