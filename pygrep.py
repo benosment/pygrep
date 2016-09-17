@@ -34,14 +34,14 @@ def color_wrap(s):
 
 
 def search(target, pattern):
-    logging.debug('target: %s' % target)
     if os.path.isdir(target):
         # recursive directory search
-        count = 0
         for (this_dir, sub_dirs, files) in os.walk(target):
             logging.debug('this dir: %s sub_dirs: %s files: %s',
                           this_dir, ' '.join(sub_dirs), ' '.join(files))
-            count += 1
+            for f in files:
+                full_path = os.path.join(this_dir, f)
+                yield from search(full_path, pattern)
     else:
         # single file case
         fp = open(target)
