@@ -40,6 +40,8 @@ def search(target, pattern):
             logging.debug('this dir: %s sub_dirs: %s files: %s',
                           this_dir, ' '.join(sub_dirs), ' '.join(files))
             for f in files:
+                if f.startswith('#') or f.endswith('~'):
+                    continue
                 full_path = os.path.join(this_dir, f)
                 yield from search(full_path, pattern)
     else:
