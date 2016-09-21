@@ -42,6 +42,8 @@ def search(target, pattern):
             for f in files:
                 if f.startswith('#') or f.endswith('~'):
                     continue
+                if '.CCACHE' in this_dir or 'venv' in this_dir:
+                    continue
                 full_path = os.path.join(this_dir, f)
                 yield from search(full_path, pattern)
     else:
