@@ -33,6 +33,13 @@ def color_wrap(s):
     return COLOR_START + s + COLOR_END
 
 
+def ignored_directory(d):
+    for s in settings.ignore_list:
+        if s in d:
+            return True
+    return False
+
+
 def search(target, pattern):
     if os.path.isdir(target):
         # recursive directory search
@@ -42,13 +49,13 @@ def search(target, pattern):
             for f in files:
                 if f.startswith('#') or f.endswith('~'):
                     continue
-                if '.CCACHE' in this_dir or 'venv' in this_dir:
+                if ignored_directory(this_dir):
                     continue
                 full_path = os.path.join(this_dir, f)
                 yield from search(full_path, pattern)
     else:
         # single file case
-        fp = open(target)
+        fp = open(target, 'rt')
         for (linenum, line) in enumerate(fp):
             match = pattern.findall(line)
             if match:

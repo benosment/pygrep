@@ -30,3 +30,10 @@ LOGGING = {
         }
     }
 }
+
+ignore_list = ['.CCACHE',
+               'venv',
+               '__pycache__',
+               '.git',
+               '.idea',
+               ]
